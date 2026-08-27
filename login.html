@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | Neuro Academy</title>
+    <meta name="theme-color" content="#050510">
+
+    <!-- 🔒 Seguridad: se agrega el dominio de Supabase en connect-src -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        img-src 'self' data:;
+        connect-src 'self' https://hrtyjewdftmijdvwycds.supabase.co https://challenges.cloudflare.com;
+        frame-src https://challenges.cloudflare.com;
+        object-src 'none';
+        base-uri 'self';
+    ">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="no-referrer">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧠</text></svg>">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #050510;
+            --neon-cyan: #00e5ff;
+            --neon-violet: #7c5cff;
+            --neon-magenta: #e040fb;
+            --neon-green: #00ff9d;
+            --text-primary: #eef0fb;
+            --text-secondary: #b7bad6;
+            --text-muted: #7c7fa0;
+            --glass-bg: rgba(15, 15, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.09);
+            --ease: cubic-bezier(.22,1,.36,1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background:
+                radial-gradient(ellipse 800px 600px at 15% 15%, #00e5ff16 0%, transparent 55%),
+                radial-gradient(ellipse 800px 600px at 85% 85%, #7c5cff18 0%, transparent 55%);
+        }
+        .back-link {
+            position: fixed; top: 1.5rem; left: 1.5rem; z-index: 2;
+            color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 0.4rem; transition: color .25s;
+        }
+        .back-link:hover { color: var(--neon-cyan); }
+
+        .auth-box {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 420px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.6rem;
+            padding: 2.4rem 2rem;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+            animation: auth-fade-in 0.6s cubic-bezier(.22,1,.36,1) both;
+        }
+        @keyframes auth-fade-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { .auth-box { animation: none; } }
+        .auth-logo { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1.6rem; }
+        .auth-logo .logo-icon { width: 36px; height: 36px; filter: drop-shadow(0 0 12px #00e5ff77); animation: logo-pulse 3.4s ease-in-out infinite; flex-shrink: 0; }
+        @keyframes logo-pulse { 0%,100% { filter: drop-shadow(0 0 8px #00e5ff55); } 50% { filter: drop-shadow(0 0 20px #7c5cffaa); } }
+        .auth-logo .brand {
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem;
+            background: linear-gradient(135deg, #fff, var(--neon-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .auth-tabs { display: flex; gap: 0.5rem; background: rgba(255,255,255,0.04); border-radius: 50px; padding: 0.3rem; margin-bottom: 1.8rem; }
+        .auth-tab {
+            flex: 1; text-align: center; padding: 0.55rem; border-radius: 50px; cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.88rem;
+            color: var(--text-muted); transition: all .3s var(--ease); border: none; background: transparent;
+        }
+        .auth-tab.active { background: linear-gradient(135deg, var(--neon-cyan), var(--neon-violet)); color: #04040a; }
+
+        .auth-form { display: none; flex-direction: column; gap: 1rem; }
+        .auth-form.active { display: flex; }
+
+        .field-group label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 500; }
+        .field-group input {
+            width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.12);
+            border-radius: 0.8rem; padding: 0.7rem 1rem; color: #fff; font-family: 'Poppins', sans-serif; font-size: 0.92rem;
+            transition: border-color .25s;
+        }
+        .field-group input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 0 3px rgba(0,229,255,0.15); }
+        .field-group input::placeholder { color: var(--text-muted); }
+
+        .btn-auth-submit {
+            margin-top: 0.4rem; width: 100%; padding: 0.85rem; border: none; border-radius: 50px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-violet)); color: #04040a;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            transition: all .3s var(--ease); display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-auth-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(124,92,255,0.4); }
+        .btn-auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .auth-message {
+            font-size: 0.85rem; padding: 0.7rem 1rem; border-radius: 0.7rem; margin-top: 0.2rem; display: none;
+        }
+        .auth-message.show { display: block; }
+        .auth-message.error { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.35); color: #ff9d9d; }
+        .auth-message.success { background: rgba(0,255,157,0.08); border: 1px solid rgba(0,255,157,0.35); color: var(--neon-green); }
+
+        .auth-footer-note { text-align: center; margin-top: 1.4rem; font-size: 0.8rem; color: var(--text-muted); }
+
+        .mini-footer { position: relative; z-index: 1; text-align: center; margin-top: 1.8rem; }
+        .mini-footer p { color: var(--text-muted); font-size: 0.76rem; margin: 0; }
+        .mini-footer a { color: var(--text-muted); text-decoration: none; }
+        .mini-footer a:hover { color: var(--neon-cyan); }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+
+    <div class="auth-box">
+        <div class="auth-logo">
+            <svg class="logo-icon" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="28" stroke="#00e5ff" stroke-width="2.5" fill="none" opacity="0.6"/><path d="M20 30 Q30 8 40 30 Q30 52 20 30Z" stroke="#7c5cff" stroke-width="2" fill="none" opacity="0.8"/><path d="M24 30 Q30 16 36 30 Q30 44 24 30Z" stroke="#00ff9d" stroke-width="1.8" fill="none" opacity="0.7"/></svg>
+            <span class="brand">Neuro Academy</span>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin">Iniciar sesión</button>
+            <button class="auth-tab" id="tabRegister">Registrarse</button>
+        </div>
+
+        <!-- FORMULARIO LOGIN -->
+        <form class="auth-form active" id="formLogin">
+            <div class="field-group">
+                <label for="loginEmail">Correo electrónico</label>
+                <input type="email" id="loginEmail" placeholder="tucorreo@ejemplo.com" required autocomplete="email">
+            </div>
+            <div class="field-group">
+                <label for="loginPassword">Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <div style="text-align:right; margin:-0.6rem 0 1rem;">
+                <a href="#" id="linkOlvidoPassword" style="color:var(--text-secondary); font-size:0.85rem; text-decoration:underline;">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEYwetWpsWQz_L4W" data-theme="dark" id="turnstileLogin"></div>
+            <button type="submit" class="btn-auth-submit" id="btnLogin">
+                <i class="fa-solid fa-right-to-bracket"></i> Entrar
+            </button>
+            <div class="auth-message" id="loginMessage"></div>
+        </form>
+
+        <!-- FORMULARIO RECUPERAR CONTRASEÑA (oculto por defecto) -->
+        <form class="auth-form" id="formRecuperar" style="display:none;">
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;">
+                Escribe tu correo y te enviaremos un link para restablecer tu contraseña.
+            </p>
+            <div class="field-group">
+                <label for="recuperarEmail">Correo electrónico</label>
+                <input type="email" id="recuperarEmail" placeholder="tucorreo@ejemplo.com" required autocomplete="email">
+            </div>
+            <button type="submit" class="btn-auth-submit" id="btnRecuperar">
+                <i class="fa-solid fa-paper-plane"></i> Enviar link de recuperación
+            </button>
+            <div class="auth-message" id="recuperarMessage"></div>
+            <p style="text-align:center; margin-top:1rem;">
+                <a href="#" id="linkVolverLogin" style="color:var(--text-secondary); font-size:0.85rem; text-decoration:underline;">Volver a iniciar sesión</a>
+            </p>
+        </form>
+
+        <!-- FORMULARIO REGISTRO -->
+        <form class="auth-form" id="formRegister">
+            <div class="field-group">
+                <label for="registerName">Nombre completo</label>
+                <input type="text" id="registerName" placeholder="Tu nombre" required autocomplete="name">
+            </div>
+            <div class="field-group">
+                <label for="registerEmail">Correo electrónico</label>
+                <input type="email" id="registerEmail" placeholder="tucorreo@ejemplo.com" required autocomplete="email">
+            </div>
+            <div class="field-group">
+                <label for="registerPassword">Contraseña</label>
+                <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres, con mayúscula, número y símbolo" required minlength="8" autocomplete="new-password">
+            </div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEYwetWpsWQz_L4W" data-theme="dark" id="turnstileRegister"></div>
+            <button type="submit" class="btn-auth-submit" id="btnRegister">
+                <i class="fa-solid fa-user-plus"></i> Crear cuenta
+            </button>
+            <div class="auth-message" id="registerMessage"></div>
+        </form>
+
+        <p class="auth-footer-note">Al registrarte, tu cuenta se crea como alumno. El acceso a tus cursos se habilita después de confirmar tu inscripción.</p>
+    </div>
+
+    <footer class="mini-footer">
+        <p>© 2026 Neuro Academy · <a href="index.html">neuroacademy.com.ec</a></p>
+    </footer>
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        // ==================== TABS ====================
+        const tabLogin = document.getElementById('tabLogin');
+        const tabRegister = document.getElementById('tabRegister');
+        const formLogin = document.getElementById('formLogin');
+        const formRegister = document.getElementById('formRegister');
+
+        tabLogin.addEventListener('click', () => {
+            tabLogin.classList.add('active'); tabRegister.classList.remove('active');
+            formLogin.classList.add('active'); formRegister.classList.remove('active');
+        });
+        tabRegister.addEventListener('click', () => {
+            tabRegister.classList.add('active'); tabLogin.classList.remove('active');
+            formRegister.classList.add('active'); formLogin.classList.remove('active');
+        });
+
+        // ==================== RECUPERAR CONTRASEÑA ====================
+        const formRecuperar = document.getElementById('formRecuperar');
+        const linkOlvidoPassword = document.getElementById('linkOlvidoPassword');
+        const linkVolverLogin = document.getElementById('linkVolverLogin');
+
+        linkOlvidoPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            formLogin.classList.remove('active');
+            formRecuperar.style.display = 'block';
+        });
+        linkVolverLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            formRecuperar.style.display = 'none';
+            formLogin.classList.add('active');
+        });
+
+        formRecuperar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnRecuperar');
+            const msgEl = document.getElementById('recuperarMessage');
+            const correo = document.getElementById('recuperarEmail').value.trim();
+
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(correo, {
+                redirectTo: window.location.origin + window.location.pathname.replace('login.html', 'restablecer.html')
+            });
+
+            // Por seguridad, siempre mostramos el mismo mensaje exista o no esa cuenta,
+            // para no revelar a un desconocido qué correos están registrados.
+            showMessage(msgEl, 'Si ese correo está registrado, te llegará un link para restablecer tu contraseña.', 'success');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar link de recuperación';
+        });
+
+        // ==================== MENSAJES ====================
+        function showMessage(el, text, type) {
+            el.textContent = text;
+            el.className = `auth-message show ${type}`;
+        }
+
+        // ==================== SI YA HAY SESIÓN, REDIRIGIR ====================
+        (async () => {
+            const { data } = await supabaseClient.auth.getSession();
+            if (data.session) window.location.href = 'cuenta.html';
+        })();
+
+        // ==================== LOGIN ====================
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            const msg = document.getElementById('loginMessage');
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const captchaToken = window.turnstile ? window.turnstile.getResponse('#turnstileLogin') : null;
+
+            if (!captchaToken) {
+                showMessage(msg, 'Por favor completa la verificación de seguridad.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
+
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password, options: { captchaToken } });
+
+            if (window.turnstile) window.turnstile.reset('#turnstileLogin');
+
+            if (error) {
+                const noConfirmado = error.message.toLowerCase().includes('confirm');
+                showMessage(msg, noConfirmado
+                    ? 'Aún no confirmas tu correo. Revisa tu bandeja de entrada y haz clic en el enlace que te enviamos.'
+                    : 'Correo o contraseña incorrectos. Intenta de nuevo.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+            } else {
+                showMessage(msg, 'Bienvenido. Redirigiendo...', 'success');
+                window.location.href = 'cuenta.html';
+            }
+        });
+
+        // ==================== REGISTRO ====================
+        formRegister.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnRegister');
+            const msg = document.getElementById('registerMessage');
+            const nombre = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const captchaToken = window.turnstile ? window.turnstile.getResponse('#turnstileRegister') : null;
+
+            if (!captchaToken) {
+                showMessage(msg, 'Por favor completa la verificación de seguridad.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creando cuenta...';
+
+            const { error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { nombre }, captchaToken }
+            });
+
+            if (window.turnstile) window.turnstile.reset('#turnstileRegister');
+
+            if (error) {
+                let mensaje = 'No se pudo crear la cuenta. Intenta de nuevo.';
+                if (error.message.includes('already')) {
+                    mensaje = 'Ese correo ya está registrado.';
+                } else if (error.message.toLowerCase().includes('password') || error.message.toLowerCase().includes('weak')) {
+                    mensaje = 'La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.';
+                }
+                showMessage(msg, mensaje, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Crear cuenta';
+            } else {
+                formRegister.reset();
+                showMessage(msg, '¡Cuenta creada! Revisa tu correo y haz clic en el enlace de confirmación para poder iniciar sesión.', 'success');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Crear cuenta';
+            }
+        });
+    </script>
+</body>
+</html>
