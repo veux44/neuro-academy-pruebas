@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar certificado | Neuro Academy</title>
+    <meta name="theme-color" content="#050510">
+
+    <!-- 🔒 Seguridad -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        img-src 'self' data:;
+        connect-src 'self' https://hrtyjewdftmijdvwycds.supabase.co;
+        object-src 'none';
+        base-uri 'self';
+    ">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧠</text></svg>">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #050510;
+            --neon-cyan: #00e5ff;
+            --neon-violet: #7c5cff;
+            --neon-green: #00ff9d;
+            --text-primary: #eef0fb;
+            --text-secondary: #b7bad6;
+            --text-muted: #7c7fa0;
+            --glass-bg: rgba(15, 15, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.09);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-deep);
+            color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 1.5rem; position: relative;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background: radial-gradient(ellipse 800px 600px at 15% 15%, #00e5ff16 0%, transparent 55%),
+                        radial-gradient(ellipse 800px 600px at 85% 85%, #7c5cff18 0%, transparent 55%);
+        }
+        .box {
+            position: relative; z-index: 1; width: 100%; max-width: 460px; background: var(--glass-bg);
+            border: 1px solid var(--glass-border); border-radius: 1.6rem; padding: 2.4rem 2rem;
+            backdrop-filter: blur(18px); box-shadow: 0 30px 80px rgba(0,0,0,0.55); text-align: center;
+        }
+        .logo { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1.6rem; }
+        .logo .logo-icon { width: 36px; height: 36px; filter: drop-shadow(0 0 12px #00e5ff77); }
+        .logo .brand {
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem;
+            background: linear-gradient(135deg, #fff, var(--neon-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .status-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .status-icon.valid { color: var(--neon-green); }
+        .status-icon.invalid { color: #ff6666; }
+
+        h1 { font-size: 1.2rem; font-weight: 600; margin: 0 0 0.4rem; }
+        .subtitle { color: var(--text-muted); font-size: 0.88rem; margin: 0 0 1.6rem; }
+
+        .cert-details { text-align: left; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 1.2rem 1.4rem; margin-top: 0.5rem; }
+        .cert-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); gap: 1rem; }
+        .cert-row:last-child { border-bottom: none; }
+        .cert-row .label { color: var(--text-muted); font-size: 0.82rem; }
+        .cert-row .value { font-weight: 600; font-size: 0.92rem; text-align: right; }
+
+        .loading { color: var(--text-muted); }
+        .footer-note { position: relative; z-index: 1; text-align: center; margin-top: 1.8rem; }
+        .footer-note p { color: var(--text-muted); font-size: 0.76rem; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="logo">
+            <svg class="logo-icon" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="28" stroke="#00e5ff" stroke-width="2.5" fill="none" opacity="0.6"/><path d="M20 30 Q30 8 40 30 Q30 52 20 30Z" stroke="#7c5cff" stroke-width="2" fill="none" opacity="0.8"/><path d="M24 30 Q30 16 36 30 Q30 44 24 30Z" stroke="#00ff9d" stroke-width="1.8" fill="none" opacity="0.7"/></svg>
+            <span class="brand">Neuro Academy</span>
+        </div>
+
+        <div id="resultado">
+            <p class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Verificando certificado...</p>
+        </div>
+    </div>
+
+    <div class="footer-note"><p>Verificación oficial de certificados · Neuro Academy</p></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        function escapeHTML(str) {
+            const d = document.createElement('div');
+            d.textContent = str ?? '';
+            return d.innerHTML;
+        }
+
+        async function verificar() {
+            const resultadoEl = document.getElementById('resultado');
+            const params = new URLSearchParams(window.location.search);
+            const codigo = params.get('codigo');
+
+            if (!codigo) {
+                resultadoEl.innerHTML = `
+                    <div class="status-icon invalid"><i class="fa-solid fa-circle-question"></i></div>
+                    <h1>Sin código de verificación</h1>
+                    <p class="subtitle">Escanea el código QR de un certificado de Neuro Academy para verificarlo aquí.</p>`;
+                return;
+            }
+
+            const { data, error } = await supabaseClient.rpc('verificar_certificado', { p_codigo: codigo });
+
+            if (error || !data || data.length === 0 || !data[0].valido) {
+                resultadoEl.innerHTML = `
+                    <div class="status-icon invalid"><i class="fa-solid fa-circle-xmark"></i></div>
+                    <h1>Certificado no válido</h1>
+                    <p class="subtitle">Este código no corresponde a ningún certificado emitido por Neuro Academy.</p>`;
+                return;
+            }
+
+            const cert = data[0];
+            const fecha = cert.fecha_emision ? new Date(cert.fecha_emision + 'T00:00:00').toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+
+            resultadoEl.innerHTML = `
+                <div class="status-icon valid"><i class="fa-solid fa-circle-check"></i></div>
+                <h1>Certificado válido</h1>
+                <p class="subtitle">Este certificado fue emitido oficialmente por Neuro Academy.</p>
+                <div class="cert-details">
+                    <div class="cert-row"><span class="label">Alumno</span><span class="value">${escapeHTML(cert.nombre_alumno)}</span></div>
+                    <div class="cert-row"><span class="label">Curso</span><span class="value">${escapeHTML(cert.nombre_curso)}</span></div>
+                    <div class="cert-row"><span class="label">Fecha de emisión</span><span class="value">${escapeHTML(fecha)}</span></div>
+                </div>`;
+        }
+
+        verificar();
+    </script>
+</body>
+</html>
